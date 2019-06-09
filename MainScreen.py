@@ -2,29 +2,72 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtPrintSupport import *
-
+import Storage
 import os
 import sys
 
 
-class MainWindow(QMainWindow):
-    def __init__(self, *args, **kwargs):
-        super(MainWindow, self).__init__(*args, **kwargs)
+class App(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.title = "Journal Application"
+        self.left = 50
+        self.top = 50
+        self.width = 640
+        self.height = 480
+        self.initUI()
 
-        self.setWindowTitle("This is some name")
+    def printfiles(self, list_widget):
+        journal_list = Storage.display_all_entries()
+        current_row = list_widget.currentRow()
+        if current_row >= 0:
+            print(journal_list[current_row][2])
+        list_widget.clear()
+        for entry in journal_list:
+            list_widget.addItem(entry[1])
 
-        label = QLabel("Some Label")
-        label.setAlignment(Qt.AlignCenter)
+    def initUI(self):
+        loadAct = QAction('&Load', self)
+        loadAct.setShortcut('Ctrl+L')
+        loadAct.setStatusTip('Load Note')
+        loadAct.triggered.connect(lambda: self.printfiles(_list))
 
-        self.setCentralWidget(label)
+        saveAct = QAction('&Save', self)
+        saveAct.setShortcut('Ctrl+S')
+        saveAct.setStatusTip('Save Note')
 
-        toolbar = QToolBar("My main toolbar")
-        self.addToolBar(toolbar)
+        exitAct = QAction('&Exit', self)
+        exitAct.setShortcut('Ctrl+Q')
+        exitAct.setStatusTip('Exit Application')
+        exitAct.triggered.connect(qApp.quit)
+
+        menubar = self.menuBar()
+        filemenu = menubar.addMenu('&File')
+        aboutmenu = menubar.addMenu('&About')
+
+        filemenu.addAction(loadAct)
+        filemenu.addAction(saveAct)
+        filemenu.addAction(exitAct)
+
+        textedit = QTextEdit()
+
+        _list = QListWidget()
+        self.printfiles(_list)
+
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.addWidget(_list)
+        splitter.addWidget(textedit)
+
+        splitter.setSizes([50, 200])
+
+        self.setCentralWidget(splitter)
+
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
+        self.show()
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-
-    window = MainWindow()
-    window.show()
-    app.exec_()
+    ex = App()
+    sys.exit(app.exec_())
