@@ -19,12 +19,15 @@ class App(QMainWindow):
 
     def printfiles(self, list_widget):
         journal_list = Storage.display_all_entries()
-        current_row = list_widget.currentRow()
-        if current_row >= 0:
-            print(journal_list[current_row][2])
         list_widget.clear()
         for entry in journal_list:
             list_widget.addItem(entry[1])
+
+    def loadEntry(self, list_widget, text_edit):
+        journal_list = Storage.display_all_entries()
+        current_row = list_widget.currentRow()
+        entry_text = journal_list[current_row][2]
+        text_edit.setText(entry_text)
 
     def initUI(self):
         loadAct = QAction('&Load', self)
@@ -53,6 +56,7 @@ class App(QMainWindow):
 
         _list = QListWidget()
         self.printfiles(_list)
+        _list.itemDoubleClicked.connect(lambda: self.loadEntry(_list, textedit))
 
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(_list)
